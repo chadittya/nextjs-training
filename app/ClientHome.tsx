@@ -26,6 +26,7 @@ export default function ClientHome({ messages }: { messages: Message[] }) {
       window.location.reload(); // Refresh to show new message
     } catch (error) {
       setResponse("Oops, something went wrong!");
+      console.log(error);
     }
     setIsLoading(false);
   };

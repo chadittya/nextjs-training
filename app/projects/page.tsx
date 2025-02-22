@@ -1,7 +1,8 @@
 import { Message } from "@/types";
 
 async function fetchProjects(): Promise<Message[]> {
-  const response = await fetch("/api/projects", {
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+  const response = await fetch(`${baseUrl}/api/projects`, {
     next: { revalidate: 10 }, // Refresh every 10s
   });
   const data = await response.json();

@@ -1,12 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import About from "@/components/About";
 import Header from "@/components/Header";
 import { Project } from "@/types";
 
 export default function ClientHome({ projects }: { projects: Project[] }) {
   const [isDark, setIsDark] = useState(false);
+  const [message, setMessage] = useState("");
+  const [response, setResponse] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const res = await fetch("/api/projects", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message }),
+    });
+    const data = await res.json();
+    setResponse(data.message);
+  };
 
   return (
     <div
@@ -32,6 +45,34 @@ export default function ClientHome({ projects }: { projects: Project[] }) {
         <p className={isDark ? "text-gray-400" : "text-gray-600"}>
           Mode: {isDark ? "Dark" : "Light"}
         </p>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <input
+            type="text"
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            placeholder="Type a message..."
+            className={`w-full p-2 rounded ${
+              isDark ? "bg-gray-800 text-white" : "bg-white text-gray-900"
+            }`}
+          />
+          <button
+            type="submit"
+            className={`px-4 py-2 rounded transition ${
+              isDark
+                ? "bg-green-700 hover:bg-green-800"
+                : "bg-green-500 hover:bg-green-600"
+            } text-white`}
+          >
+            Send
+          </button>
+          {response && (
+            <p className={isDark ? "text-green-400" : "text-green-600"}>
+              {response}
+            </p>
+          )}
+        </form>
+
         <About isDark={isDark} />
         <div>
           <h3

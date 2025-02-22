@@ -1,4 +1,7 @@
+import { PrismaClient } from "@prisma/client";
 import { NextResponse } from "next/server";
+
+const prisma = new PrismaClient();
 
 export async function GET() {
   const response = await fetch(
@@ -9,10 +12,15 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const body = await request.json(); //parse incoming request body
-  console.log("Received", body); //log it for now
+  const { message } = await request.json();
+  const newMessage = await prisma.message.create({
+    data: {
+      content: message,
+    },
+  });
+  console.log("Saved", newMessage);
   return NextResponse.json(
-    { message: "Data received!", data: body },
+    { message: "Data received and saved!", data: newMessage },
     { status: 201 }
   );
 }

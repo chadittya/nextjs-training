@@ -9,16 +9,23 @@ export default function ClientHome({ projects }: { projects: Project[] }) {
   const [isDark, setIsDark] = useState(false);
   const [message, setMessage] = useState("");
   const [response, setResponse] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const res = await fetch("/api/projects", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message }),
-    });
-    const data = await res.json();
-    setResponse(data.message);
+    setIsLoading(true);
+    try {
+      const res = await fetch("/api/projects", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message }),
+      });
+      const data = await res.json();
+      setResponse(data.message);
+    } catch (error) {
+      setResponse("Oops, something went wrong!");
+    }
+    setIsLoading(false);
   };
 
   return (
@@ -64,7 +71,7 @@ export default function ClientHome({ projects }: { projects: Project[] }) {
                 : "bg-green-500 hover:bg-green-600"
             } text-white`}
           >
-            Send
+            {isLoading ? "Sending..." : "Send"}
           </button>
           {response && (
             <p className={isDark ? "text-green-400" : "text-green-600"}>
@@ -82,16 +89,22 @@ export default function ClientHome({ projects }: { projects: Project[] }) {
           >
             Projects Preview
           </h3>
-          <ul className="list-disc pl-5 space-y-2">
-            {projects.map((project) => (
-              <li
-                key={project.id}
-                className={isDark ? "text-gray-300" : "text-gray-700"}
-              >
-                {project.title}
-              </li>
-            ))}
-          </ul>
+          {projects.length > 0 ? (
+            <ul className="list-disc pl-5 space-y-2">
+              {projects.map((project) => (
+                <li
+                  key={project.id}
+                  className={isDark ? "text-gray-300" : "text-gray-700"}
+                >
+                  {project.title}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className={isDark ? "text-gray-400" : "text-gray-600"}>
+              No projects yet!
+            </p>
+          )}
         </div>
       </main>
     </div>

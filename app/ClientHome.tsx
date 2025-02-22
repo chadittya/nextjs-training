@@ -24,6 +24,7 @@ export default function ClientHome({ projects }: { projects: Project[] }) {
       setResponse(data.message);
     } catch (error) {
       setResponse("Oops, something went wrong!");
+      console.log(error);
     }
     setIsLoading(false);
   };

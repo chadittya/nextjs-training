@@ -1,18 +1,16 @@
-import { Project } from "@/types";
+import { Message } from "@/types";
 import ClientHome from "./ClientHome";
 
-async function fetchProjects(): Promise<Project[]> {
-  const response = await fetch(
-    "https://jsonplaceholder.typicode.com/posts?_limit=3",
-    {
-      next: { revalidate: 3600 }, // Revalidate every hour
-    }
-  );
+async function fetchMessages(): Promise<Message[]> {
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+  const response = await fetch(`${baseUrl}/api/projects`, {
+    next: { revalidate: 10 }, // Refresh every 10s
+  });
   const data = await response.json();
   return data;
 }
 
 export default async function Home() {
-  const projects = await fetchProjects();
-  return <ClientHome projects={projects} />;
+  const messages = await fetchMessages();
+  return <ClientHome messages={messages} />;
 }

@@ -1,10 +1,9 @@
-import { Project } from "@/types";
+import { Message } from "@/types";
 
-async function fetchProjects(): Promise<Project[]> {
-  const response = await fetch(
-    "https://jsonplaceholder.typicode.com/posts?_limit=3",
-    { cache: "no-store" } // fresh data every request
-  );
+async function fetchProjects(): Promise<Message[]> {
+  const response = await fetch("/api/projects", {
+    next: { revalidate: 10 }, // Refresh every 10s
+  });
   const data = await response.json();
   return data;
 }
@@ -17,7 +16,7 @@ export default async function Projects() {
       <ul className="mt-4 list-disc pl-5 space-y-2">
         {projects.map((project) => (
           <li key={project.id} className="text-gray-700">
-            {project.title}
+            {project.content}
           </li>
         ))}
       </ul>

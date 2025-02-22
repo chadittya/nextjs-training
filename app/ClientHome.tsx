@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import About from "@/components/About";
 import Header from "@/components/Header";
-import { Project } from "@/types";
+import { Message } from "@/types";
 
-export default function ClientHome({ projects }: { projects: Project[] }) {
+export default function ClientHome({ messages }: { messages: Message[] }) {
   const [isDark, setIsDark] = useState(false);
   const [message, setMessage] = useState("");
   const [response, setResponse] = useState("");
@@ -22,11 +22,35 @@ export default function ClientHome({ projects }: { projects: Project[] }) {
       });
       const data = await res.json();
       setResponse(data.message);
+      setMessage("");
+      window.location.reload(); // Refresh to show new message
     } catch (error) {
       setResponse("Oops, something went wrong!");
-      console.log(error);
     }
     setIsLoading(false);
+  };
+
+  const handleUpdate = async (id: number, content: string) => {
+    const newContent = prompt("Edit message:", content);
+    if (newContent) {
+      await fetch("/api/projects", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, content: newContent }),
+      });
+      window.location.reload();
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    if (confirm("Delete this message?")) {
+      await fetch("/api/projects", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+      window.location.reload();
+    }
   };
 
   return (
@@ -53,7 +77,6 @@ export default function ClientHome({ projects }: { projects: Project[] }) {
         <p className={isDark ? "text-gray-400" : "text-gray-600"}>
           Mode: {isDark ? "Dark" : "Light"}
         </p>
-
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="text"
@@ -66,6 +89,7 @@ export default function ClientHome({ projects }: { projects: Project[] }) {
           />
           <button
             type="submit"
+            disabled={isLoading}
             className={`px-4 py-2 rounded transition ${
               isDark
                 ? "bg-green-700 hover:bg-green-800"
@@ -80,7 +104,6 @@ export default function ClientHome({ projects }: { projects: Project[] }) {
             </p>
           )}
         </form>
-
         <About isDark={isDark} />
         <div>
           <h3
@@ -88,22 +111,45 @@ export default function ClientHome({ projects }: { projects: Project[] }) {
               isDark ? "text-gray-200" : "text-gray-800"
             }`}
           >
-            Projects Preview
+            Messages
           </h3>
-          {projects.length > 0 ? (
+          {messages.length > 0 ? (
             <ul className="list-disc pl-5 space-y-2">
-              {projects.map((project) => (
+              {messages.map((msg) => (
                 <li
-                  key={project.id}
+                  key={msg.id}
                   className={isDark ? "text-gray-300" : "text-gray-700"}
                 >
-                  {project.title}
+                  {msg.content}{" "}
+                  <span className="text-sm">
+                    ({new Date(msg.createdAt).toLocaleString()})
+                  </span>
+                  <button
+                    onClick={() => handleUpdate(msg.id, msg.content)}
+                    className={`ml-2 px-2 py-1 text-sm rounded ${
+                      isDark
+                        ? "bg-yellow-600 hover:bg-yellow-700"
+                        : "bg-yellow-500 hover:bg-yellow-600"
+                    } text-white`}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(msg.id)}
+                    className={`ml-2 px-2 py-1 text-sm rounded ${
+                      isDark
+                        ? "bg-red-600 hover:bg-red-800"
+                        : "bg-red-500 hover:bg-red-600"
+                    } text-white`}
+                  >
+                    Delete
+                  </button>
                 </li>
               ))}
             </ul>
           ) : (
             <p className={isDark ? "text-gray-400" : "text-gray-600"}>
-              No projects yet!
+              No messages yet!
             </p>
           )}
         </div>

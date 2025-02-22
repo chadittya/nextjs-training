@@ -1,4 +1,5 @@
-export type Project = {
+export type Message = {
   id: number;
-  title: string;
+  content: string;
+  createdAt: string; // or Date
 };

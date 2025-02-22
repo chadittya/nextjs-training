@@ -3,8 +3,10 @@ import ClientHome from "./ClientHome";
 
 async function fetchProjects(): Promise<Project[]> {
   const response = await fetch(
-    "http://localhost:3000/api/projects",
-    { next: { revalidate: 3600 } } // revalidate every hour
+    "https://jsonplaceholder.typicode.com/posts?_limit=3",
+    {
+      next: { revalidate: 3600 }, // Revalidate every hour
+    }
   );
   const data = await response.json();
   return data;

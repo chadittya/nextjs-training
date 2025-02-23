@@ -31,6 +31,7 @@ export default function ClientHome({
       setMessage("");
     } catch (error) {
       setResponse("Oops, something went wrong!");
+      console.log(error);
     }
     setIsLoading(false);
   };
@@ -48,6 +49,7 @@ export default function ClientHome({
         setMessages(messages.map((msg) => (msg.id === id ? updated : msg)));
       } catch (error) {
         setResponse("Update failed!");
+        console.log(error);
       }
     }
   };
@@ -63,6 +65,7 @@ export default function ClientHome({
         setMessages(messages.filter((msg) => msg.id !== id));
       } catch (error) {
         setResponse("Delete failed!");
+        console.log(error);
       }
     }
   };

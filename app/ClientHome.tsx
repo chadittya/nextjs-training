@@ -5,11 +5,16 @@ import About from "@/components/About";
 import Header from "@/components/Header";
 import { Message } from "@/types";
 
-export default function ClientHome({ messages }: { messages: Message[] }) {
+export default function ClientHome({
+  messages: initialMessages,
+}: {
+  messages: Message[];
+}) {
   const [isDark, setIsDark] = useState(false);
   const [message, setMessage] = useState("");
   const [response, setResponse] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [messages, setMessages] = useState(initialMessages);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,11 +27,10 @@ export default function ClientHome({ messages }: { messages: Message[] }) {
       });
       const data = await res.json();
       setResponse(data.message);
+      setMessages([data.data, ...messages]); // Add new message
       setMessage("");
-      window.location.reload(); // Refresh to show new message
     } catch (error) {
       setResponse("Oops, something went wrong!");
-      console.log(error);
     }
     setIsLoading(false);
   };
@@ -34,23 +38,32 @@ export default function ClientHome({ messages }: { messages: Message[] }) {
   const handleUpdate = async (id: number, content: string) => {
     const newContent = prompt("Edit message:", content);
     if (newContent) {
-      await fetch("/api/projects", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, content: newContent }),
-      });
-      window.location.reload();
+      try {
+        const res = await fetch("/api/projects", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id, content: newContent }),
+        });
+        const updated = await res.json();
+        setMessages(messages.map((msg) => (msg.id === id ? updated : msg)));
+      } catch (error) {
+        setResponse("Update failed!");
+      }
     }
   };
 
   const handleDelete = async (id: number) => {
     if (confirm("Delete this message?")) {
-      await fetch("/api/projects", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id }),
-      });
-      window.location.reload();
+      try {
+        await fetch("/api/projects", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id }),
+        });
+        setMessages(messages.filter((msg) => msg.id !== id));
+      } catch (error) {
+        setResponse("Delete failed!");
+      }
     }
   };
 
